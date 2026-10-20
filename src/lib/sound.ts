@@ -27,15 +27,37 @@ function ac(): AudioContext | null {
     const d = noise.getChannelData(0)
     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1
   }
-  if (ctx.state === "suspended") void ctx.resume()
   return ctx
 }
 
-/** Call once at startup: unlocks audio on the first user gesture. */
+/**
+ * Wake audio from inside a real user gesture.
+ * iPhones only allow this on a finger *release* or click (not touch-down), and
+ * they suspend audio again when the phone locks or the tab is hidden — so we
+ * keep listening and re-wake whenever it isn't running. A one-sample silent
+ * sound is played in the same gesture, which iOS needs to actually unlock.
+ */
+let lastGesture = 0
+
+function wake() {
+  lastGesture = performance.now()
+  const c = ac()
+  if (!c || c.state === "running") return
+  void c.resume()
+  try {
+    const b = c.createBuffer(1, 1, 22050)
+    const s = c.createBufferSource()
+    s.buffer = b
+    s.connect(c.destination)
+    s.start(0)
+  } catch { /* nothing to unlock with */ }
+}
+
+/** Call once at startup. Cheap to keep: does nothing once audio is running. */
 export function primeAudio() {
-  const unlock = () => { ac(); window.removeEventListener("pointerdown", unlock); window.removeEventListener("keydown", unlock) }
-  window.addEventListener("pointerdown", unlock, { passive: true })
-  window.addEventListener("keydown", unlock)
+  const events = ["touchend", "click", "pointerup", "keydown"] as const
+  events.forEach(e => window.addEventListener(e, wake, { capture: true, passive: true }))
+  return () => events.forEach(e => window.removeEventListener(e, wake, { capture: true }))
 }
 
 export const isMuted = () => muted
@@ -47,7 +69,11 @@ export function setMuted(m: boolean) {
 function ready() {
   if (muted) return null
   const c = ac()
-  return c && c.state === "running" && master && noise ? c : null
+  if (!c || !master || !noise) return null
+  if (c.state === "running") return c
+  // still waking from the tap that triggered this sound: schedule it, it plays once audio is up
+  if (performance.now() - lastGesture < 400 && c.state !== "closed") return c
+  return null
 }
 
 /** Filtered noise burst with an attack/decay envelope. */
