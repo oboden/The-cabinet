@@ -25,7 +25,7 @@ export function Cabinet({ open, focused, pulled, onToggle, onOpenFolder }: Props
       const w = parseFloat(css.getPropertyValue("--stage-w")) || STAGE_W
       // also fit the opened cabinet (plus a lifted folder) between the search bar and the dial
       const h = parseFloat(css.getPropertyValue("--fit-h")) || 730
-      const freeH = window.innerHeight - 210
+      const freeH = window.innerHeight - 230
       const s = Math.max(0.3, Math.min(0.86, e.contentRect.width / w, freeH / h))
       el.style.setProperty("--scale", s.toFixed(4))
     })

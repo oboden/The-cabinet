@@ -224,7 +224,7 @@ export default function App() {
 
   return (
     <>
-      <header className="blur-top sticky top-[env(safe-area-inset-top,0px)] z-30 pb-8 pt-4 pl-[max(16px,env(safe-area-inset-left,0px))] pr-[max(16px,env(safe-area-inset-right,0px))]">
+      <header className="blur-top relative z-30 pb-8 pt-[calc(env(safe-area-inset-top,0px)+32px)] md:pt-8 pl-[max(16px,env(safe-area-inset-left,0px))] pr-[max(16px,env(safe-area-inset-right,0px))]">
         <div className="mx-auto grid max-w-[440px] gap-2.5">
           <div className="flex items-center justify-between gap-3">
             <h1 className="text-[17px] font-semibold tracking-[-0.02em]">The Cabinet</h1>
@@ -286,7 +286,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="-mt-6 pb-48 pl-[max(16px,env(safe-area-inset-left,0px))] pr-[max(16px,env(safe-area-inset-right,0px))]">
+      <main className="-mt-6 pl-[max(16px,env(safe-area-inset-left,0px))] pr-[max(16px,env(safe-area-inset-right,0px))]">
         <div
           ref={idleRef}
           className={cn("mx-auto max-w-[900px]", placed && "transition-transform duration-[1100ms] ease-[cubic-bezier(.62,0,.18,1)]")}

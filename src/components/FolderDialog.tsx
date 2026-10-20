@@ -121,7 +121,7 @@ function OpenFolder({ letter }: { letter: Letter }) {
         tabIndex={-1}
         className="absolute inset-0 touch-none overflow-hidden outline-none"
       >
-        <div className="mx-auto flex flex-col items-center gap-6 px-6 pt-[calc(env(safe-area-inset-top,0px)+96px)] pb-[45vh] pl-[68px] pr-5 md:gap-8 md:px-6 md:pt-[140px]">
+        <div className="mx-auto flex flex-col items-center gap-6 px-6 pt-[calc(env(safe-area-inset-top,0px)+108px)] pb-[45vh] pl-[68px] pr-5 md:gap-8 md:px-6 md:pt-[140px]">
           {sheets.map((s, i) => (
             <article
               key={s}
@@ -139,7 +139,7 @@ function OpenFolder({ letter }: { letter: Letter }) {
       </div>
 
       {/* top: folder name, close, and the contents — all on a dark progressive blur */}
-      <header className="blur-top-dark pointer-events-none absolute inset-x-0 top-0 z-20 pb-10 pt-[max(16px,env(safe-area-inset-top,0px))]">
+      <header className="blur-top-dark pointer-events-none absolute inset-x-0 top-0 z-20 pb-10 pt-[calc(env(safe-area-inset-top,0px)+28px)] md:pt-[max(16px,env(safe-area-inset-top,0px))]">
         <div className="pointer-events-auto mx-auto flex max-w-[440px] items-center justify-between pl-[max(16px,env(safe-area-inset-left,0px))] pr-[max(16px,env(safe-area-inset-right,0px))]">
           <div className="flex items-baseline gap-2.5">
             <DialogTitle className="text-[17px] font-semibold tracking-[-0.02em] text-white">Folder {letter}</DialogTitle>
@@ -157,7 +157,7 @@ function OpenFolder({ letter }: { letter: Letter }) {
       {/* contents: a vertical picker down the left edge */}
       <nav
         aria-label="Folder contents"
-        className="absolute bottom-0 top-[calc(env(safe-area-inset-top,0px)+90px)] md:top-[136px] z-10 left-[max(4px,env(safe-area-inset-left,0px))] w-16 md:left-[max(24px,calc(50%-380px))] md:w-40 animate-in fade-in-0 slide-in-from-left-2 fill-mode-both duration-500"
+        className="absolute bottom-0 top-[calc(env(safe-area-inset-top,0px)+102px)] md:top-[136px] z-10 left-[max(4px,env(safe-area-inset-left,0px))] w-16 md:left-[max(24px,calc(50%-380px))] md:w-40 animate-in fade-in-0 slide-in-from-left-2 fill-mode-both duration-500"
         style={{ animationDelay: "120ms" }}
       >
         <ol

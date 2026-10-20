@@ -82,11 +82,11 @@
 @layer base {
   * { @apply border-border outline-ring/50; }
   html, body { background: var(--paper); color: var(--ink); }
-  html { overflow-x: clip; }
+  /* The homepage is a one-screen app: the page itself never scrolls or bounces.
+     (Only the dial and an open folder's sheets scroll, inside their own areas.) */
+  html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
   body {
     @apply font-sans antialiased;
-    min-height: 100dvh;
-    overflow-x: hidden;
     -webkit-tap-highlight-color: transparent;
     font-feature-settings: "cv11", "ss01";
   }
