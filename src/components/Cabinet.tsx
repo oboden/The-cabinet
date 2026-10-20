@@ -1,7 +1,7 @@
 import { useEffect, useRef, type CSSProperties } from "react"
 import { LETTERS, sheetCount, tabSlot, type Letter } from "@/lib/folders"
 
-const STAGE_W = 560
+const STAGE_W = 700
 const TAB_X = [14, 106, 198]
 
 type Props = {
@@ -43,6 +43,7 @@ export function Cabinet({ open, focused, pulled, onToggle, onOpenFolder }: Props
             <div className="cab-face cab-cav cab-cav--l" />
             <div className="cab-face cab-cav cab-cav--r" />
             <div className="cab-face cab-front" />
+            <div className="cab-face cab-ghost" aria-hidden="true" />
 
             <div className="cab-drawer">
               <div className="cab-face cab-d-floor" />

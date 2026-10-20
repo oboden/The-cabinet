@@ -23,8 +23,8 @@ export default function App() {
   const inputRef = useRef<HTMLInputElement>(null)
   const busy = useRef(false)
 
-  // While the drawer is shut, sit the cabinet in the middle of the free space
-  // between the search bar and the dial. Opening returns it to its usual place.
+  // Centre the cabinet together with where its tray will reach, in the free space
+  // between the search bar and the dial. It then never moves: only the tray slides.
   const formRef = useRef<HTMLFormElement>(null)
   const idleRef = useRef<HTMLDivElement>(null)
   const [idleShift, setIdleShift] = useState({ x: 0, y: 0 })
@@ -111,7 +111,7 @@ export default function App() {
       const dial = document.querySelector("[data-keep-open]")
       if (!wrap || !form || !dial) return
       let l = Infinity, r = -Infinity, t = Infinity, b = -Infinity
-      wrap.querySelectorAll(".cab-front, .cab-top, .cab-side").forEach(el => {
+      wrap.querySelectorAll(".cab-front, .cab-top, .cab-side, .cab-ghost").forEach(el => {
         const q = el.getBoundingClientRect()
         if (!q.width) return
         l = Math.min(l, q.left); r = Math.max(r, q.right); t = Math.min(t, q.top); b = Math.max(b, q.bottom)
@@ -275,7 +275,7 @@ export default function App() {
         <div
           ref={idleRef}
           className={cn("mx-auto max-w-[900px]", placed && "transition-transform duration-[1100ms] ease-[cubic-bezier(.62,0,.18,1)]")}
-          style={{ transform: drawerOpen ? "none" : `translate(${idleShift.x}px, ${idleShift.y}px)` }}
+          style={{ transform: `translate(${idleShift.x}px, ${idleShift.y}px)` }}
         >
           <Cabinet
             open={drawerOpen}
