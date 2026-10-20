@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from "react"
+import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react"
 import { ArrowUpRight, Search, Volume2, VolumeX, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,6 +22,15 @@ export default function App() {
   const [muted, setMutedState] = useState(isMuted)
   const inputRef = useRef<HTMLInputElement>(null)
   const busy = useRef(false)
+
+  // While the drawer is shut, sit the cabinet in the middle of the free space
+  // between the search bar and the dial. Opening returns it to its usual place.
+  const formRef = useRef<HTMLFormElement>(null)
+  const idleRef = useRef<HTMLDivElement>(null)
+  const [idleShift, setIdleShift] = useState({ x: 0, y: 0 })
+  const shiftRef = useRef(idleShift)
+  shiftRef.current = idleShift
+  const [placed, setPlaced] = useState(false) // no glide for the very first placement
 
   const parsed = firstLetter(query)
 
@@ -94,6 +103,47 @@ export default function App() {
     if (drawerOpen) { clearPending(); setFocused(null); setQuery("") }
     setDrawer(!drawerOpen)
   }
+
+  useLayoutEffect(() => {
+    if (drawerOpen) return
+    const measure = () => {
+      const wrap = idleRef.current, form = formRef.current
+      const dial = document.querySelector("[data-keep-open]")
+      if (!wrap || !form || !dial) return
+      let l = Infinity, r = -Infinity, t = Infinity, b = -Infinity
+      wrap.querySelectorAll(".cab-front, .cab-top, .cab-side").forEach(el => {
+        const q = el.getBoundingClientRect()
+        if (!q.width) return
+        l = Math.min(l, q.left); r = Math.max(r, q.right); t = Math.min(t, q.top); b = Math.max(b, q.bottom)
+      })
+      if (!isFinite(l)) return
+      // subtract whatever offset is applied right now (even mid-transition) to get the resting spot
+      const m = new DOMMatrixReadOnly(getComputedStyle(wrap).transform === "none" ? undefined : getComputedStyle(wrap).transform)
+      const restX = (l + r) / 2 - m.m41
+      const restY = (t + b) / 2 - m.m42
+      const midY = (form.getBoundingClientRect().bottom + dial.getBoundingClientRect().top) / 2
+      const x = Math.round(window.innerWidth / 2 - restX)
+      const y = Math.round(Math.max(0, midY - restY))
+      const cur = shiftRef.current
+      if (Math.abs(x - cur.x) > 1 || Math.abs(y - cur.y) > 1) setIdleShift({ x, y })
+      requestAnimationFrame(() => setPlaced(true))
+    }
+    // re-measure once the cabinet has scaled itself to the column, and on any resize
+    const raf = requestAnimationFrame(() => requestAnimationFrame(measure))
+    const ro = new ResizeObserver(() => requestAnimationFrame(measure))
+    const wrap = idleRef.current
+    if (wrap) ro.observe(wrap)
+    // after the drawer finishes sliding shut, take the final reading
+    const onDone = (e: TransitionEvent) => { if (e.target !== wrap) measure() }
+    wrap?.addEventListener("transitionend", onDone)
+    const late = window.setTimeout(measure, 1200)
+    window.addEventListener("resize", measure)
+    return () => {
+      cancelAnimationFrame(raf); ro.disconnect(); window.clearTimeout(late)
+      wrap?.removeEventListener("transitionend", onDone)
+      window.removeEventListener("resize", measure)
+    }
+  }, [drawerOpen])
 
   // A click anywhere that isn't the cabinet or a control pushes the drawer shut.
   useEffect(() => {
@@ -179,7 +229,7 @@ export default function App() {
             </div>
           </div>
 
-          <form role="search" onSubmit={onSubmit} className="flex gap-1.5" autoComplete="off">
+          <form ref={formRef} role="search" onSubmit={onSubmit} className="flex gap-1.5" autoComplete="off">
             <div className="relative min-w-0 flex-1">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-graphite" />
               <label htmlFor="q" className="sr-only">Search folders by name</label>
@@ -222,7 +272,11 @@ export default function App() {
       </header>
 
       <main className="-mt-6 pb-48 pl-[max(16px,env(safe-area-inset-left,0px))] pr-[max(16px,env(safe-area-inset-right,0px))]">
-        <div className="mx-auto max-w-[900px]">
+        <div
+          ref={idleRef}
+          className={cn("mx-auto max-w-[900px]", placed && "transition-transform duration-[1100ms] ease-[cubic-bezier(.62,0,.18,1)]")}
+          style={{ transform: drawerOpen ? "none" : `translate(${idleShift.x}px, ${idleShift.y}px)` }}
+        >
           <Cabinet
             open={drawerOpen}
             focused={focused}
