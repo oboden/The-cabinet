@@ -20,11 +20,19 @@ export function Cabinet({ open, focused, pulled, onToggle, onOpenFolder }: Props
     const el = stageRef.current
     if (!el) return
     const ro = new ResizeObserver(([e]) => {
-      const s = Math.min(0.86, e.contentRect.width / STAGE_W)
+      // phones use a front-on view that needs less width (see --stage-w in cabinet.css)
+      const css = getComputedStyle(el)
+      const w = parseFloat(css.getPropertyValue("--stage-w")) || STAGE_W
+      // also fit the opened cabinet (plus a lifted folder) between the search bar and the dial
+      const h = parseFloat(css.getPropertyValue("--fit-h")) || 730
+      const freeH = window.innerHeight - 210
+      const s = Math.max(0.3, Math.min(0.86, e.contentRect.width / w, freeH / h))
       el.style.setProperty("--scale", s.toFixed(4))
     })
     ro.observe(el)
-    return () => ro.disconnect()
+    const onResize = () => { ro.unobserve(el); ro.observe(el) } // height changes don't resize the column
+    window.addEventListener("resize", onResize)
+    return () => { ro.disconnect(); window.removeEventListener("resize", onResize) }
   }, [])
 
   return (

@@ -110,22 +110,35 @@ export default function App() {
       const wrap = idleRef.current, form = formRef.current
       const dial = document.querySelector("[data-keep-open]")
       if (!wrap || !form || !dial) return
-      let l = Infinity, r = -Infinity, t = Infinity, b = -Infinity
-      wrap.querySelectorAll(".cab-front, .cab-top, .cab-side, .cab-ghost").forEach(el => {
-        const q = el.getBoundingClientRect()
-        if (!q.width) return
-        l = Math.min(l, q.left); r = Math.max(r, q.right); t = Math.min(t, q.top); b = Math.max(b, q.bottom)
-      })
-      if (!isFinite(l)) return
-      // subtract whatever offset is applied right now (even mid-transition) to get the resting spot
+      const box = (sel: string) => {
+        let l = Infinity, r = -Infinity, t = Infinity, b = -Infinity
+        wrap.querySelectorAll(sel).forEach(el => {
+          const q = el.getBoundingClientRect()
+          if (!q.width) return
+          l = Math.min(l, q.left); r = Math.max(r, q.right); t = Math.min(t, q.top); b = Math.max(b, q.bottom)
+        })
+        return { l, r, t, b }
+      }
+      // where things would sit with no offset applied (even if a glide is mid-way)
       const m = new DOMMatrixReadOnly(getComputedStyle(wrap).transform === "none" ? undefined : getComputedStyle(wrap).transform)
-      const restX = (l + r) / 2 - m.m41
-      const restY = (t + b) / 2 - m.m42
-      const midY = (form.getBoundingClientRect().bottom + dial.getBoundingClientRect().top) / 2
-      // centred when it fits; on narrow screens keep the tray end on screen and let the cabinet's back run off the left
-      const vw = window.innerWidth, w = r - l, edge = 10
-      const x = Math.round(w <= vw - edge * 2 ? vw / 2 - restX : (vw - edge) - (r - m.m41))
-      const y = Math.round(Math.max(0, midY - restY))
+      const rest = (q: { l: number; r: number; t: number; b: number }) =>
+        ({ l: q.l - m.m41, r: q.r - m.m41, t: q.t - m.m42, b: q.b - m.m42 })
+      const body = rest(box(".cab-front, .cab-top, .cab-side"))          // the closed cabinet
+      const all = rest(box(".cab-front, .cab-top, .cab-side, .cab-ghost")) // plus where the tray reaches
+      if (!isFinite(body.l)) return
+
+      // free area between the search bar and the dial
+      const vw = window.innerWidth, edge = 12
+      const free = { l: edge, r: vw - edge, t: form.getBoundingClientRect().bottom + 8, b: dial.getBoundingClientRect().top - 8 }
+
+      // aim to centre the closed cabinet; then nudge only as much as needed to keep the opened tray on screen
+      const fit = (want: number, aL: number, aR: number, fL: number, fR: number) => {
+        const lo = fL - aL, hi = fR - aR
+        if (lo > hi) return hi // too big to fit: keep the tray end in view, let the back run off
+        return Math.min(hi, Math.max(lo, want))
+      }
+      const x = Math.round(fit(vw / 2 - (body.l + body.r) / 2, all.l, all.r, free.l, free.r))
+      const y = Math.round(fit((free.t + free.b) / 2 - (body.t + body.b) / 2, all.t, all.b, free.t, free.b))
       const cur = shiftRef.current
       if (Math.abs(x - cur.x) > 1 || Math.abs(y - cur.y) > 1) setIdleShift({ x, y })
       requestAnimationFrame(() => setPlaced(true))

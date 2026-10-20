@@ -18,6 +18,11 @@
   height: calc(var(--stage-h) * var(--scale, 1));
 }
 
+/* Phones: front-on, so the tray slides down the screen (the direction a phone has room for). */
+@media (max-width: 640px) {
+  .cab-stage { --yaw: 8deg; --tilt: -38deg; --stage-w: 560; --fit-h: 830; }
+}
+
 .cab-camera {
   position: absolute; left: 50%; top: 0;
   width: 460px; height: var(--stage-h); margin-left: -230px;
