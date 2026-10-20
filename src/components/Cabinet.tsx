@@ -1,7 +1,7 @@
 import { useEffect, useRef, type CSSProperties } from "react"
 import { LETTERS, sheetCount, tabSlot, type Letter } from "@/lib/folders"
 
-const STAGE_W = 700
+const STAGE_W = 580
 const TAB_X = [14, 106, 198]
 
 type Props = {

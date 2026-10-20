@@ -122,7 +122,9 @@ export default function App() {
       const restX = (l + r) / 2 - m.m41
       const restY = (t + b) / 2 - m.m42
       const midY = (form.getBoundingClientRect().bottom + dial.getBoundingClientRect().top) / 2
-      const x = Math.round(window.innerWidth / 2 - restX)
+      // centred when it fits; on narrow screens keep the tray end on screen and let the cabinet's back run off the left
+      const vw = window.innerWidth, w = r - l, edge = 10
+      const x = Math.round(w <= vw - edge * 2 ? vw / 2 - restX : (vw - edge) - (r - m.m41))
       const y = Math.round(Math.max(0, midY - restY))
       const cur = shiftRef.current
       if (Math.abs(x - cur.x) > 1 || Math.abs(y - cur.y) > 1) setIdleShift({ x, y })

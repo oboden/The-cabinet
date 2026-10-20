@@ -7,8 +7,8 @@
 .cab-stage {
   /* One fixed camera for open and closed: only the tray moves. */
   --stage-h: 780px;
-  --tilt: -32deg;      /* how far we look down on the cabinet */
-  --yaw: 20deg;        /* front turned toward the right */
+  --tilt: -30deg;      /* how far we look down on the cabinet */
+  --yaw: 34deg;        /* front turned toward the right */
   --pull: 470px;       /* how far the tray slides out: all the way, so every tab is reachable */
   --wx: 0px;
   --ease: cubic-bezier(.62, 0, .18, 1);
