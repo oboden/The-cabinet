@@ -1,0 +1,126 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@fontsource-variable/inter";
+@import "./cabinet.css";
+
+/*
+  Layout: one centred column — blurred search bar on top, the cabinet in the
+  middle, the letter dial docked at the bottom.
+  Look: technical line drawing on white; one signal colour for focus.
+*/
+:root {
+  --paper: #ffffff;      /* page */
+  --sheet: #ffffff;      /* folder + paper faces */
+  --wash: #f4f4f3;       /* quiet fills: drawer floor, folder lining */
+  --sheet-dim: #ececea;  /* folders pushed back when one is raised */
+  --ink: #141413;        /* every line */
+  --graphite: #737370;   /* secondary text */
+  --rule: #e4e4e2;       /* hairlines */
+  --signal: #3b5bff;     /* focus colour on paper */
+  --signal-soft: #aebdff;/* focus colour on the dark dial */
+
+  --radius: 0.75rem;
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: var(--sheet);
+  --card-foreground: var(--ink);
+  --popover: var(--sheet);
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: var(--sheet);
+  --secondary: #f1f1f0;
+  --secondary-foreground: var(--ink);
+  --muted: #f1f1f0;
+  --muted-foreground: var(--graphite);
+  --accent: #f1f1f0;
+  --accent-foreground: var(--ink);
+  --destructive: #d4381c;
+  --border: var(--rule);
+  --input: var(--rule);
+  --ring: var(--signal);
+  color-scheme: light;
+}
+
+@theme inline {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Inter Variable", ui-sans-serif, system-ui, sans-serif; /* one family; numbers use tabular-nums */
+
+  --color-paper: var(--paper);
+  --color-sheet: var(--sheet);
+  --color-wash: var(--wash);
+  --color-ink: var(--ink);
+  --color-graphite: var(--graphite);
+  --color-rule: var(--rule);
+  --color-signal: var(--signal);
+  --color-signal-soft: var(--signal-soft);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * { @apply border-border outline-ring/50; }
+  html, body { background: var(--paper); color: var(--ink); }
+  html { overflow-x: clip; }
+  body {
+    @apply font-sans antialiased;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+    font-feature-settings: "cv11", "ss01";
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0 0 auto; z-index: 40;
+    height: env(safe-area-inset-top, 0px); background: var(--paper);
+  }
+  input[type="search"]::-webkit-search-cancel-button { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; transition-delay: 0s !important; }
+}
+
+/* Progressive blur: strong at the very top, fading out downward (and the mirror at the bottom). */
+.blur-top, .blur-bottom { isolation: isolate; } /* both are already sticky/fixed */
+.blur-top::before, .blur-bottom::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2);
+}
+.blur-top::before {
+  background: linear-gradient(rgb(255 255 255 / .92), rgb(255 255 255 / .65) 60%, rgb(255 255 255 / 0));
+  -webkit-mask-image: linear-gradient(#000 55%, transparent); mask-image: linear-gradient(#000 55%, transparent);
+}
+.blur-bottom::before {
+  background: linear-gradient(rgb(255 255 255 / 0), rgb(255 255 255 / .7) 40%, rgb(255 255 255 / .94));
+  -webkit-mask-image: linear-gradient(transparent, #000 45%); mask-image: linear-gradient(transparent, #000 45%);
+}
+
+/* Dark variant for the open folder, so the foreground separates from the blurred cabinet. */
+.blur-top-dark { isolation: isolate; }
+.blur-top-dark::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  background: linear-gradient(rgb(20 20 19 / .72), rgb(20 20 19 / .45) 60%, rgb(20 20 19 / 0));
+  -webkit-mask-image: linear-gradient(#000 60%, transparent); mask-image: linear-gradient(#000 60%, transparent);
+}
